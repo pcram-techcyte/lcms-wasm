@@ -2869,31 +2869,6 @@ var instantiate = function() {
                 transform
             ]);
         }
-        function typeListByBytes(bytes, isFloat) {
-            if (isFloat) {
-                switch(bytes){
-                    case 0:
-                    case 4:
-                        return "float";
-                    case 8:
-                        return "double";
-                }
-            } else {
-                switch(bytes){
-                    case 1:
-                        return "i8";
-                    case 2:
-                        return "i16";
-                    case 4:
-                        return "i32";
-                    case 0:
-                    case 8:
-                        return "i64";
-                }
-            }
-            console.error("typeListByBytes(bytes:" + bytes + ", isFloat:" + isFloat + ")");
-            return null;
-        }
         Module.cmsDoTransform = cmsDoTransform;
         function cmsDoTransform(transform, inputArr, size) {
             var inputFormat = cmsGetTransformInputFormat(transform);
@@ -2906,13 +2881,16 @@ var instantiate = function() {
             var outputBytes = T_BYTES(outputFormat);
             inputBytes = inputBytes < 1 ? 4 : inputBytes;
             outputBytes = outputBytes < 1 ? 4 : outputBytes;
-            var inputType = typeListByBytes(inputBytes, inputIsFloat);
-            var outputType = typeListByBytes(outputBytes, outputIsFloat);
-            var inputBuffer = _malloc(inputChannels * inputBytes * size);
-            var outputBuffer = _malloc(outputChannels * outputBytes * size);
-            for(var i = 0; i < inputChannels * size; i++){
-                setValue(inputBuffer + inputBytes * i, inputArr[i], inputType);
+            var inputBufferSize = inputChannels * inputBytes * size;
+            var inputBuffer = _malloc(inputBufferSize);
+            if (inputIsFloat) {
+                var dataOnHeap = new Float32Array(Module.HEAPU8.buffer, inputBuffer, inputBufferSize);
+            } else {
+                var dataOnHeap = new Uint8Array(Module.HEAPU8.buffer, inputBuffer, inputBufferSize);
             }
+            dataOnHeap.set(inputArr);
+            var outputBufferSize = outputChannels * outputBytes * size;
+            var outputBuffer = _malloc(outputBufferSize);
             ccall("cmsDoTransform", undefined, [
                 "number",
                 "number",
@@ -2925,12 +2903,9 @@ var instantiate = function() {
                 size
             ]);
             if (outputIsFloat) {
-                var outputArr = new Float32Array(outputChannels * size);
+                var outputArr = new Float32Array(Module.HEAPU8.buffer, outputBuffer, outputBufferSize);
             } else {
-                var outputArr = new Uint8Array(outputChannels * size);
-            }
-            for(var i = 0; i < outputChannels * size; i++){
-                outputArr[i] = getValue(outputBuffer + outputBytes * i, outputType);
+                var outputArr = new Uint8Array(Module.HEAPU8.buffer, outputBuffer, outputBufferSize);
             }
             _free(inputBuffer);
             _free(outputBuffer);
