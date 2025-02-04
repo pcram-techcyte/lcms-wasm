@@ -4,14 +4,10 @@
   "type": "module",
   "description": "LittleCMS in JS with WASM",
   "main": "./dist/cjs/lcms.js",
-  "module": "./dist/mjs/lcms.js",
+  "module": "./dist/lcms.js",
   "exports": {
     ".": {
-      "import": "./dist/mjs/lcms.js",
-      "require": "./dist/cjs/lcms.js"
-    },
-    "./dist/lcms.wasm": {
-      "import": "./dist/mjs/lcms.js",
+      "import": "./dist/lcms.js",
       "require": "./dist/cjs/lcms.js"
     }
   },
