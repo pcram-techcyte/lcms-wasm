@@ -3,7 +3,14 @@
   "version": "1.0.4",
   "type": "module",
   "description": "LittleCMS in JS with WASM",
-  "main": "./dist/lcms.js",
+  "main": "./dist/cjs/lcms.js",
+  "module": "./dist/mjs/lcms.js",
+  "exports": {
+    ".": {
+      "import": "./dist/mjs/lcms.js",
+      "require": "./dist/cjs/lcms.js"
+    }
+  },
   "license": "MIT",
   "author": {
     "name": "Matt DesLauriers",

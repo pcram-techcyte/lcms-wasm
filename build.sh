@@ -1,6 +1,6 @@
 SRC_DIR=Little-CMS/src
 INCLUDE_DIR=Little-CMS/include
-BIN_DIR=dist
+BIN_DIR=dist/mjs
 
 SYMBOLS=$(cat lib/export.txt)
 exported_opt=""
@@ -38,3 +38,34 @@ emcc \
   -O3\
   --closure 0\
   -g0
+
+BIN_DIR=dist/cjs
+
+
+mkdir -p $BIN_DIR
+
+emcc \
+  -o $BIN_DIR/lcms.js\
+  -I $INCLUDE_DIR $SRC_DIR/*.c\
+  -s WASM=1\
+  -s ENVIRONMENT=web,worker\
+  -s MODULARIZE=1\
+  -s FILESYSTEM=0\
+  -s ASSERTIONS=1\
+  -s EXPORT_ES6=1\
+  -s USE_ES6_IMPORT_META=0\
+  -s DISABLE_EXCEPTION_CATCHING=0\
+  -s USE_PTHREADS=0\
+  -s EXPORT_NAME="instantiate"\
+  -s ALLOW_MEMORY_GROWTH=1\
+  -s EXPORTED_RUNTIME_METHODS=["cwrap","ccall"]\
+  -s EXPORTED_FUNCTIONS=$exported_opt\
+  -s TOTAL_STACK=15MB\
+  --post-js lib/api.js\
+  --extern-post-js lib/post.js\
+  --extern-pre-js lib/constants.js\
+  -O3\
+  --closure 0\
+  -g0
+
+  npx swc dist -d dist/cjs --strip-leading-paths
