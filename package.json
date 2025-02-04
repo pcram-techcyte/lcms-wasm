@@ -9,6 +9,10 @@
     ".": {
       "import": "./dist/lcms.js",
       "require": "./dist/cjs/lcms.js"
+    },
+    "./dist/lcms.wasm": {
+      "import": "./dist/lcms.wasm",
+      "require": "./dist/lcms.wasm"
     }
   },
   "license": "MIT",
